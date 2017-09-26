@@ -1,0 +1,9 @@
+{
+    "default": {
+        "driver": "mysql",
+        "host": "",
+        "user": "eurest",
+        "password": "eurest1234",
+        "db_name": ""
+    }
+}
