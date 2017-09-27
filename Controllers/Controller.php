@@ -26,6 +26,16 @@
             $this->errorPath = $this->viewsPath . '/errors';
         }
 
+        private function getContent($path)
+        {
+            ob_start();
+            include $path;
+            $file = ob_get_contents();
+            ob_end_clean();
+
+            return $file;
+        }
+
         /**
          * Return view corresponding to the given name.
          *
@@ -39,8 +49,8 @@
         public function view(string $name): string
         {
             $path = implode('/', array($this->viewsPath, $name));
-            $file = file_get_contents($path);
-            return ($file !== '') ? $file : $this->error('404');
+            $file = $this->getContent($path);
+            return (!empty($file)) ? $file : $this->error('404');
         }
 
         /**

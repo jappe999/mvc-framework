@@ -6,6 +6,6 @@
     </head>
     <body>
         <h1>Hello World!</h1>
-        <p>Dit is een klein framework.</p>
+        <p><?= "Dit is een klein framework." ?></p>
     </body>
 </html>
