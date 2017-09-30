@@ -1,5 +1,9 @@
 <?php
 
+    namespace Controllers;
+
+    use Core\Request as Request;
+
     /**
      * Controller class
      */
@@ -26,8 +30,14 @@
             $this->errorPath = $this->viewsPath . '/errors';
         }
 
-        private function getContent($path)
+        private function getContent($path, $params)
         {
+            if (!empty($params)) {
+                foreach ($params as $key => $value) {
+                    ${$key} = $value;
+                }
+            }
+
             ob_start();
             include $path;
             $file = ob_get_contents();
@@ -46,10 +56,10 @@
          *
          * @return string
          */
-        public function view(string $name): string
+        public function view(string $name, array $params = NULL): string
         {
             $path = implode('/', array($this->viewsPath, $name));
-            $file = $this->getContent($path);
+            $file = $this->getContent($path, $params);
             return (!empty($file)) ? $file : $this->error('404');
         }
 

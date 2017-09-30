@@ -1,4 +1,7 @@
 <?php
+
+    namespace Core;
+
     /**
      * Database class for calling the database.
      *
@@ -8,7 +11,7 @@
     class Database extends PDO
     {
         private $db;
-        private $configFile = __DIR__ . '../config/database.json';
+        private $configFile = __DIR__ . '/../config/database.json';
         private $config;
 
         /**

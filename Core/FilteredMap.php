@@ -1,6 +1,9 @@
 <?php
+
+    namespace Core;
+
     /**
-     * FilteredMap class
+     * FilteredMap class.
      */
     class FilteredMap
     {

@@ -1,18 +1,12 @@
 <?php
 
-    require_once 'Controller.php';
+    namespace Controllers;
 
     /**
      * HomeController
      */
     class HomeController extends Controller
     {
-
-        function __construct(Request $request)
-        {
-            parent::__construct($request);
-        }
-
         /**
          * Get the home page.
          *

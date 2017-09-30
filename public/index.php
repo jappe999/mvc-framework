@@ -1,11 +1,16 @@
 <?php
 
-    require_once __DIR__ . '/../Core/Kernel.php';
-    require_once __DIR__ . '/../Core/Request.php';
-
-    // Instanciate request class
-    $request = new Request();
+    require_once '../Core/Kernel.php';
 
     // Get response from the kernel
-    $response = handle($request);
-    echo $response;
+    $kernel = new Core\Kernel();
+
+    spl_autoload_register(function ($class) {
+        global $kernel;
+        $kernel->registerClass($class);
+    });
+
+    // Instanciate request class
+    $request = new Core\Request();
+
+    echo $kernel->handle($request);

@@ -1,5 +1,7 @@
 <?php
 
+    namespace Core;
+
     /**
      * Router class
      */
@@ -108,8 +110,7 @@
         private function executeController($request, $route, $info, $path)
         {
             // Include controller by name.
-            $controllerName = $info['controller'] . 'Controller';
-            include_once __DIR__ . "/../Controllers/$controllerName.php";
+            $controllerName = 'Controllers\\' . $info['controller'] . 'Controller';
             $controller = new $controllerName($request);
 
             // Get parameters and call controller.

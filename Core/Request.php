@@ -1,6 +1,8 @@
 <?php
 
-    require_once 'FilteredMap.php';
+    namespace Core;
+
+    use Core\FilteredMap as FilteredMap;
 
     /**
      * Class to easily cut requests into pieces.
@@ -141,7 +143,7 @@
          *
          * @return boolean
          */
-        public function isPost(): boolean
+        public function isPost(): bool
         {
             return $this->method === self::POST;
         }
@@ -153,7 +155,7 @@
          *
          * @return boolean
          */
-        public function isGet(): boolean
+        public function isGet(): bool
         {
             return $this->method === self::GET;
         }
