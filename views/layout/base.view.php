@@ -2,9 +2,10 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>404</title>
+        <title>Hello World!</title>
+        @yield('head')
     </head>
     <body>
-        <h1>404 - Not Found</h1>
+        @yield('body')
     </body>
 </html>

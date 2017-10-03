@@ -1,5 +1,7 @@
 <?php
 
+    namespace Model;
+
     /**
      * Base class for methods
      */

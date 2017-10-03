@@ -2,6 +2,8 @@
 
     namespace Core;
 
+    use Controllers\Controller as Controller;
+
     /**
      * Router class
      */

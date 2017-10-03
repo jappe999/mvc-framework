@@ -16,6 +16,6 @@
          */
         public function get(): string
         {
-            return $this->view('home.php');
+            return $this->view('home.view.php');
         }
     }

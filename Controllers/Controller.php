@@ -3,6 +3,7 @@
     namespace Controllers;
 
     use Core\Request as Request;
+    use Core\Template as Template;
 
     /**
      * Controller class
@@ -38,10 +39,15 @@
                 }
             }
 
+
             ob_start();
             include $path;
             $file = ob_get_contents();
             ob_end_clean();
+
+            // TODO: Fix template engine
+            $template = new Template('home.view.php');
+            $file     = $template->render();
 
             return $file;
         }
@@ -58,8 +64,8 @@
          */
         public function view(string $name, array $params = NULL): string
         {
-            $path = implode('/', array($this->viewsPath, $name));
-            $file = $this->getContent($path, $params);
+            $path  = implode('/', array($this->viewsPath, $name));
+            $file  = $this->getContent($path, $params);
             return (!empty($file)) ? $file : $this->error('404');
         }
 
@@ -75,7 +81,7 @@
          */
         public function error(string $code): string
         {
-            $fileName = $code . '.php';
+            $fileName = $code . '.template.php';
             $path = implode('/', array($this->errorPath, $fileName));
             return file_get_contents($path);
         }
