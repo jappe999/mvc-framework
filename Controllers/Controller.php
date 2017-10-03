@@ -81,7 +81,7 @@
          */
         public function error(string $code): string
         {
-            $fileName = $code . '.template.php';
+            $fileName = $code . '.view.php';
             $path = implode('/', array($this->errorPath, $fileName));
             return file_get_contents($path);
         }

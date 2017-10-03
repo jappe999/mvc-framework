@@ -29,9 +29,9 @@
         }
 
         /**
-         * Recieves requests and passes them to the router.
+         * Receives requests and passes them to the router.
          *
-         * Recieves requests and passes them to the created router.
+         * Receives requests and passes them to the created router.
          *
          * @param Request $request
          *
