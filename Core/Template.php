@@ -83,7 +83,7 @@ class Template
         $file = $this->removeNewlines($file);
 
         $yieldRegex   = "/@yield\(\'([a-z0-9_\/\-]*)\'\)/";
-        $sectionRegex = "/@section\(\'(.*)\'\)(.*)@endsection/";
+        $sectionRegex = "/@section\(\'([a-zA-Z0-9\_\-\/\\\.]+)\'\)(.*)@endsection/";
 
         preg_match_all($yieldRegex, $extend, $yields);
         preg_match_all($sectionRegex, $file, $sections);
@@ -106,31 +106,43 @@ class Template
         return $extend;
     }
 
-    private function isVariable($tag)
+    private function isVariable(string $tag): bool
     {
-        return !preg_match("/(->)/", $tag);
+        return !preg_match("/(->|\(.*\))/", $tag);
     }
 
     private function getFunction($tag, $params)
     {
         $splittedTag = preg_split("/(->)/", $tag);
 
-        // Remove empty items.
-
         $response = '';
         foreach ($splittedTag as $key => $value) {
+            // Remove empty items.
             if (empty($value)) {
                 unset($splittedTag[$key]);
                 continue;
             }
 
             $value = preg_replace('/^\$/', '', $value);
-            if (empty($response)) {
-                $response = $this->{$value};
-            } elseif (preg_match_all('/(\((.*)\)$)/', $value)) {
-                $value = preg_replace('/(\((.*)\)$)/', '', $value);
+
+            if ($value == 'this') {
+                $response = $this;
+            } else if (preg_match('/\([\"\']?(.*(?![\)]))[\"\']?\)$/', $value, $matches)) {
+                // Match a function with arguments
+                $arguments = explode(',', $matches[1]);
+                $value     = preg_replace('/\((.*)\)$/', '', $value);
+
+                $callable = ($response == '') ? $value : array($response, $value);
+                $response = call_user_func_array($callable, $arguments);
+
+            } else if (preg_match('/\(\)/', $value)) {
+                // Match a function without arguments
+                $value    = preg_replace('/\(\)$/', '', $value);
                 $response = $response->{$value}();
+            } else if (empty($response)) {
+                $response = $this->{$value};
             } else {
+                // Call next variable;
                 $response = $response->{$value};
             }
         }
@@ -148,8 +160,10 @@ class Template
     {
         $this->setParams($params);
 
-        $regex = "/{{\s*([\$\-\>\<a-zA-Z0-9\(\)\[\]\'\"]*)\s*}}/";
+        $regex = "/{{\s*([\$\_\-\>\<a-zA-Z0-9\(\)\[\]\'\"]*)\s*}}/";
+        // $regex = "/{{\s*(.*)\s*}}/";
         preg_match_all($regex, $file, $matches);
+        // var_dump($matches);
         $tags = $matches[1];
 
         foreach ($tags as $tag) {
@@ -189,4 +203,9 @@ class Template
 
         return $file;
     }
+}
+
+function say(string $msg = '')
+{
+    return $msg;
 }
