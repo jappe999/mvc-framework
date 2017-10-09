@@ -33,6 +33,22 @@ class Template
             $this->viewPath = $this->viewsPath . $viewPath;
     }
 
+    public function setParams(array $params)
+    {
+        // Set parameters
+        if (count($params) > 0) {
+            foreach ($params as $key => $value) {
+                $this->{$key} = $value;
+            }
+        }
+    }
+
+    /**
+     * Just removes new line chars.
+     *
+     * @param string $file
+     * @return string
+     */
     private function removeNewlines(string $file): string
     {
         return preg_replace('/\n/', '', $file);
@@ -53,7 +69,16 @@ class Template
         return array($file, $extend);
     }
 
-    private function replaceYields(string $file, string $extend): string
+    /**
+     * Replace @yield with the content of @section
+     *
+     * Replace @yield statements with the content the corressponding @section statement
+     *
+     * @param string $file
+     * @param string $extend
+     * @return string
+     */
+    private function renderYields(string $file, string $extend): string
     {
         $file = $this->removeNewlines($file);
 
@@ -62,11 +87,12 @@ class Template
 
         preg_match_all($yieldRegex, $extend, $yields);
         preg_match_all($sectionRegex, $file, $sections);
-        // var_dump($yields[1], $sections[1]);
 
+        // Replace @yield with corressponding @section
         foreach ($yields[1] as $yield) {
             foreach ($sections[1] as $key => $section) {
                 if ($yield === $section) {
+                    // Create a custom regex
                     $replaceRegex = "/@yield\(\'$yield\'\)/";
                     $replacement = $sections[2][$key];
                     $extend = preg_replace($replaceRegex, $replacement, $extend);
@@ -74,35 +100,92 @@ class Template
             }
         }
 
+        // Remove unused @yield statements
         $extend = preg_replace($yieldRegex, '', $extend);
 
         return $extend;
     }
 
+    private function isVariable($tag)
+    {
+        return !preg_match("/(->)/", $tag);
+    }
+
+    private function getFunction($tag, $params)
+    {
+        $splittedTag = preg_split("/(->)/", $tag);
+
+        // Remove empty items.
+
+        $response = '';
+        foreach ($splittedTag as $key => $value) {
+            if (empty($value)) {
+                unset($splittedTag[$key]);
+                continue;
+            }
+
+            $value = preg_replace('/^\$/', '', $value);
+            if (empty($response)) {
+                $response = $this->{$value};
+            } elseif (preg_match_all('/(\((.*)\)$)/', $value)) {
+                $value = preg_replace('/(\((.*)\)$)/', '', $value);
+                $response = $response->{$value}();
+            } else {
+                $response = $response->{$value};
+            }
+        }
+
+        return $response;
+    }
+
     /**
-     * Render the view
+     * Render all variables and functions
+     *
+     * @param string $file
+     * @return string
+     */
+    private function renderTags(string $file, $params): string
+    {
+        $this->setParams($params);
+
+        $regex = "/{{\s*([\$\-\>\<a-zA-Z0-9\(\)\[\]\'\"]*)\s*}}/";
+        preg_match_all($regex, $file, $matches);
+        $tags = $matches[1];
+
+        foreach ($tags as $tag) {
+            if ($this->isVariable($tag))
+                $replacement = ${$tag};
+            else
+                $replacement = $this->getFunction($tag, $params);
+
+            $escapedTag = preg_quote($tag);
+            $regex      = "/{{\s*($escapedTag)\s*}}/";
+            $file       = preg_replace($regex, $replacement, $file);
+        }
+
+        return $file;
+    }
+
+    /**
+     * Render the view.
      *
      * Render the view with the given parameters.
      *
      * @param array $params
-     *
      * @return string
      */
     function render(array $params = array()): string
     {
         $file = file_get_contents($this->viewPath);
 
-        if (count($params) > 0) {
-            foreach ($params as $key => $value) {
-                ${$key} = $val;
-            }
-        }
-
+        // Get the extend of the file
         list($file, $extend) = $this->getExtend($file);
 
         if (!empty($extend)) {
-            $file = $this->replaceYields($file, $extend);
+            $file = $this->renderYields($file, $extend);
         }
+
+        $file = $this->renderTags($file, $params);
 
         return $file;
     }

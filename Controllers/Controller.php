@@ -33,11 +33,13 @@
 
         private function getContent($path, $params)
         {
+            $request = $this->request;
             if (!empty($params)) {
                 foreach ($params as $key => $value) {
-                    ${$key} = $value;
+                    if ($key != 'request') ${$key} = $value;
                 }
             }
+            $params = array_merge($params, compact('request'));
 
 
             ob_start();
@@ -47,7 +49,7 @@
 
             // TODO: Fix template engine
             $template = new Template('home.view.php');
-            $file     = $template->render();
+            $file     = $template->render($params);
 
             return $file;
         }
@@ -62,7 +64,7 @@
          *
          * @return string
          */
-        public function view(string $name, array $params = NULL): string
+        public function view(string $name, array $params = array()): string
         {
             $path  = implode('/', array($this->viewsPath, $name));
             $file  = $this->getContent($path, $params);
