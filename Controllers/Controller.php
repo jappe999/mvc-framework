@@ -31,24 +31,13 @@
             $this->errorPath = $this->viewsPath . '/errors';
         }
 
-        private function getContent($path, $params)
+        private function getContent($path, $params = array())
         {
             $request = $this->request;
-            if (!empty($params)) {
-                foreach ($params as $key => $value) {
-                    if ($key != 'request') ${$key} = $value;
-                }
-            }
+
             $params = array_merge($params, compact('request'));
 
-
-            ob_start();
-            include $path;
-            $file = ob_get_contents();
-            ob_end_clean();
-
-            // TODO: Fix template engine
-            $template = new Template('home.view.php');
+            $template = new Template($path);
             $file     = $template->render($params);
 
             return $file;
@@ -85,6 +74,6 @@
         {
             $fileName = $code . '.view.php';
             $path = implode('/', array($this->errorPath, $fileName));
-            return file_get_contents($path);
+            return $this->getContent($path);
         }
     }

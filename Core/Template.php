@@ -13,6 +13,7 @@ class Template
      * @var string
      */
     private $viewsPath;
+    private $viewPath;
 
     function __construct(string $viewPath)
     {
@@ -29,8 +30,13 @@ class Template
      */
     public function setPath(string $viewPath)
     {
-        if (!empty($viewPath))
-            $this->viewPath = $this->viewsPath . $viewPath;
+        if (!empty($viewPath)) {
+            if (strpos($viewPath, $this->viewsPath) !== false) {
+                $this->viewPath = $this->viewsPath . $viewPath;
+            } else {
+                $this->viewPath = $viewPath;
+            }
+        }
     }
 
     public function setParams(array $params)
@@ -111,7 +117,14 @@ class Template
         return !preg_match("/(->|\(.*\))/", $tag);
     }
 
-    private function getFunction($tag, $params)
+    /**
+     * Get the output of the called function in the template.
+     *
+     * @param string $tag
+     * @param array $params
+     * @return array|string|int
+     */
+    private function getFunction(string $tag, array $params)
     {
         $splittedTag = preg_split("/(->)/", $tag);
 
@@ -123,26 +136,35 @@ class Template
                 continue;
             }
 
+            // Remove dollar sign.
             $value = preg_replace('/^\$/', '', $value);
 
             if ($value == 'this') {
+                // If variable starts with $this.
                 $response = $this;
             } else if (preg_match('/\([\"\']?(.*(?![\)]))[\"\']?\)$/', $value, $matches)) {
                 // Match a function with arguments
+
+                // Get arguments and strip the arguments from $value.
                 $arguments = explode(',', $matches[1]);
                 $value     = preg_replace('/\((.*)\)$/', '', $value);
 
-                $callable = ($response == '') ? $value : array($response, $value);
+                // Call the function with or without $response.
+                $callable = ($response != '') ? array($response, $value) : $value;
                 $response = call_user_func_array($callable, $arguments);
-
             } else if (preg_match('/\(\)/', $value)) {
-                // Match a function without arguments
+                // Match a function without arguments.
+
+                // Remove () from $value.
                 $value    = preg_replace('/\(\)$/', '', $value);
+
+                // Call the function.
                 $response = $response->{$value}();
             } else if (empty($response)) {
+                // If the first variable isn't set yet and all above conditions don't match.
                 $response = $this->{$value};
             } else {
-                // Call next variable;
+                // Call next variable in line.
                 $response = $response->{$value};
             }
         }
