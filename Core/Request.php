@@ -56,12 +56,31 @@
          */
         public function __construct()
         {
-            $this->domain  = $_SERVER['HTTP_HOST'];
-            $this->path    = $_SERVER['REQUEST_URI'];
-            $this->method  = $_SERVER['REQUEST_METHOD'];
-
             $this->params  = new FilteredMap($_REQUEST);
             $this->cookies = new FilteredMap($_COOKIE);
+
+            $this->domain  = $_SERVER['HTTP_HOST'];
+            $this->path    = $this->trimPath($_SERVER['REQUEST_URI']);
+            $this->method  = $_SERVER['REQUEST_METHOD'];
+        }
+
+        /**
+         * Trim the path and remove parameters.
+         *
+         * @param  string $path
+         * @return string
+         */
+        private function setPath(string $path): string
+        {
+            // Check if request has any GET parameters.
+            if ($this->isGet() && $this->params->length() > 0) {
+                $paramsPos   = strpos($path, '?');
+                $trimmedPath = substr($path, 0, $paramsPos);
+            } else {
+                $trimmedPath = $path;
+            }
+
+            return $trimmedPath;
         }
 
         /**

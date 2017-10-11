@@ -3,9 +3,9 @@
     namespace Model;
 
     /**
-     * Base class for methods
+     * Base class for models
      */
-    class Method
+    class Model
     {
         function __construct()
         {

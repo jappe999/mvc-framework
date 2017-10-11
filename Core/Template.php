@@ -143,7 +143,7 @@ class Template
                 // If variable starts with $this.
                 $response = $this;
             } else if (preg_match('/\([\"\']?(.*(?![\)]))[\"\']?\)$/', $value, $matches)) {
-                // Match a function with arguments
+                // Match a function with arguments: function ('arguments')
 
                 // Get arguments and strip the arguments from $value.
                 $arguments = explode(',', $matches[1]);

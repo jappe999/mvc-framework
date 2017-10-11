@@ -29,6 +29,16 @@
         }
 
         /**
+         * Get length of the $this->map array.
+         *
+         * @return int
+         */
+        public function length(): int
+        {
+            return count($this->map);
+        }
+
+        /**
          * Checks if the given map contains an index.
          *
          * Checks if the given map contains a specific index.
