@@ -1,0 +1,15 @@
+<?php
+
+return [
+  "default" => [
+    "driver" => "mysql",
+    "host" => "localhost",
+    "user" => "root",
+    "password" => "",
+    "db_name" => "",
+    "options" => [
+      PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+      PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]
+  ]
+];

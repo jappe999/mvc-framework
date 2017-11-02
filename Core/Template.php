@@ -1,23 +1,28 @@
 <?php
+/**
+ * This file contains the Template class.
+ */
 
 namespace Core;
 
 /**
- * A simple template engine
+ * A simple template engine.
+ * It contains unnecessary much code, but it'll have to do.
  */
 class Template
 {
     /**
-     * Default path to views.
+     * Path to views.
      *
      * @var string
      */
-    private $viewsPath;
     private $viewPath;
 
+    /**
+     * Constructing
+     */
     function __construct(string $viewPath)
     {
-        $this->viewsPath = __DIR__ . '/../views/';
         $this->setPath($viewPath);
     }
 
@@ -31,14 +36,19 @@ class Template
     public function setPath(string $viewPath)
     {
         if (!empty($viewPath)) {
-            if (strpos($viewPath, $this->viewsPath) !== false) {
-                $this->viewPath = $this->viewsPath . $viewPath;
+            if (strpos($viewPath, VIEWS_PATH) === false) {
+                $this->viewPath = VIEWS_PATH . $viewPath;
             } else {
                 $this->viewPath = $viewPath;
             }
         }
     }
 
+    /**
+     * Define parameters in the class dynamically.
+     *
+     * @param array $params
+     */
     public function setParams(array $params)
     {
         // Set parameters
@@ -60,15 +70,24 @@ class Template
         return preg_replace('/\n/', '', $file);
     }
 
+    /**
+     * Get the extend of a file. Aka the base file of the view.
+     *
+     * Get the file contents of the extend defined in the view and
+     * remove any @extend()'s from the view.
+     *
+     * @param string $file
+     * @return array Stripped file and extend file contents.
+     */
     private function getExtend(string $file): array
     {
         $extendRegex = "/@extend\(\'(.*)\'\)/";
         $extend      = "";
 
-        // Replace @extend() with file.
+        // Replace @extend() with file contents.
         preg_match($extendRegex, $file, $match);
         if ($match)
-            $extend = file_get_contents($this->viewsPath . $match[1]);
+            $extend = file_get_contents(VIEWS_PATH . $match[1]);
 
         $file = preg_replace($extendRegex, '', $file);
 
@@ -112,6 +131,12 @@ class Template
         return $extend;
     }
 
+    /**
+     * Dumb check for variable checking :/
+     *
+     * @param string $tag
+     * @return bool
+     */
     private function isVariable(string $tag): bool
     {
         return !preg_match("/(->|\(.*\))/", $tag);
@@ -173,9 +198,10 @@ class Template
     }
 
     /**
-     * Render all variables and functions
+     * Render all variables and functions.
      *
      * @param string $file
+     * @param array $params
      * @return string
      */
     private function renderTags(string $file, $params): string
@@ -217,17 +243,11 @@ class Template
         // Get the extend of the file
         list($file, $extend) = $this->getExtend($file);
 
-        if (!empty($extend)) {
+        if (!empty($extend))
             $file = $this->renderYields($file, $extend);
-        }
 
         $file = $this->renderTags($file, $params);
 
         return $file;
     }
-}
-
-function say(string $msg = '')
-{
-    return $msg;
 }

@@ -2,10 +2,10 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>404</title>
+        <title>Hello World at {{ $this->domain }}</title>
+        @yield('head')
     </head>
     <body>
-        <h1>404 - Not Found</h1>
-        <p>{{ $request->getPath() }}</p>
+        @yield('body')
     </body>
 </html>

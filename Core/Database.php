@@ -1,37 +1,61 @@
 <?php
+/**
+ * This file contains the core Database class.
+ */
 
-    namespace Core;
+namespace Core;
+
+use PDO;
+
+/**
+ * Database class for calling the database.
+ *
+ * This handles the default database settings
+ * with config/database.php
+ */
+class Database
+{
+    /**
+     * Default config path for database connections.
+     *
+     * @var string
+     */
+    private static $configFile = CONFIG_PATH . 'database.php';
 
     /**
-     * Database class for calling the database.
+     * Construct PDO class with default values
      *
-     * This handles the default database settings
-     * with config/database.json
+     * Construct a PDO instance with the configurations
+     * found in "/config/database.php".
+     *
+     * @param string $name
+     * @return PDO
      */
-    class Database extends PDO
+    public static function connect($name = 'default'): PDO
     {
-        private $db;
-        private $configFile = __DIR__ . '/../config/database.json';
-        private $config;
+        $config   = require self::$configFile;
 
-        /**
-         * Construct PDO class with default values
-         *
-         * Construct a PDO instance with the configurations
-         * found in "/config/database.json".
-         */
-        function __construct($name = NULL)
-        {
-            $name         = $name ?? 'default';
-            $this->config = file_get_contents($configFile);
+        $driver   = $config[$name]['driver'];
+        $host     = $config[$name]['host'];
+        $user     = $config[$name]['user'];
+        $password = $config[$name]['password'];
+        $dbname   = $config[$name]['db_name'];
+        $options  = $config[$name]['options'];
+        $dns      = "$driver:host=$host;dbname=$dbname";
 
-            $driver   = $this->config[$name]['driver'];
-            $host     = $this->config[$name]['host'];
-            $user     = $this->config[$name]['user'];
-            $password = $this->config[$name]['password'];
-            $dbname   = $this->config[$name]['db_name'];
-            $dns      = "$driver:host=$host;dbname=$dbname";
-
-            $this->db = parent::__construct($dns, $user, $password);
-        }
+        // Return a new PDO instance.
+        return new PDO($dns, $user, $password, $options);
     }
+
+    /**
+     * Prepare a query with the default database connection.
+     *
+     * @param $query
+     * @return PDO
+     */
+    public static function prepare($query)
+    {
+        $pdoInstance = self::connect();
+        return $pdoInstance->prepare($query);
+    }
+}

@@ -1,16 +1,13 @@
 <?php
 
-    require_once '../Core/Kernel.php';
+// Define globals.
+require '../config/definitions.php';
 
-    // Get response from the kernel
-    $kernel = new Core\Kernel();
+// Autoloader.
+require '../Core/autoloader.php';
 
-    spl_autoload_register(function ($class) {
-        global $kernel;
-        $kernel->registerClass($class);
-    });
+// All other that must be included in every page.
+require '../Core/bootstrap.php';
 
-    // Instanciate request class
-    $request = new Core\Request();
-
-    echo $kernel->handle($request);
+// Handle the request.
+Core\Router::load()->handle();
